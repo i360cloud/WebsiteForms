@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>General Support</title>
+<style>
+  :root { --accent:#2563eb; --border:#d1d5db; --text:#111827; --muted:#6b7280; }
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,sans-serif; background:#f3f4f6; color:var(--text); margin:0; padding:24px; }
+  form { max-width:640px; margin:0 auto; background:#fff; padding:32px; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.1); }
+  h1 { margin:0 0 8px; font-size:1.6rem; }
+  .notice { background:#f9fafb; border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-size:.9rem; margin-bottom:24px; }
+  label { display:block; font-weight:600; margin:18px 0 6px; font-size:.95rem; }
+  .req::after { content:" *"; color:#dc2626; }
+  input, select, textarea { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font:inherit; }
+  input:focus, select:focus, textarea:focus { outline:2px solid var(--accent); border-color:transparent; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  button { margin-top:24px; width:100%; padding:12px; background:var(--accent); color:#fff; border:0; border-radius:8px; font:inherit; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:default; }
+  #result { margin-top:16px; text-align:center; font-size:.95rem; }
+  .hp { display:none; }
+  @media (max-width:520px) { .row { grid-template-columns:1fr; } form { padding:20px; } }
+</style>
+</head>
+<body>
+<form id="support-form">
+  <h1>General Support</h1>
+  <div class="notice">
+    <!-- Edit this notice text and add your after-hours portal link -->
+    After hours support: please log a ticket via your account holder portal.<br>
+    <strong>Support hours:</strong> 8am to 6pm Monday to Friday (AEDST), excluding national public holidays.
+  </div>
+
+  <input type="hidden" name="access_key" value="a103f246-b715-4e68-8845-53909ed3fd23">
+  <input type="hidden" name="subject" value="New General Support request">
+  <input type="hidden" name="from_name" value="Support Form">
+  <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off">
+
+  <label class="req" for="business">Business Name</label>
+  <input id="business" name="Business Name" required>
+
+  <label class="req">Your Name</label>
+  <div class="row">
+    <div><input name="First Name" placeholder="First Name" required aria-label="First name"></div>
+    <div><input name="Last Name" placeholder="Last Name" required aria-label="Last name"></div>
+  </div>
+
+  <label class="req" for="email">Your Email</label>
+  <input id="email" type="email" name="email" placeholder="example@example.com" required>
+
+  <label class="req" for="phone">Phone number (incl. area code)</label>
+  <input id="phone" type="tel" name="Phone" required pattern="[0-9+()\s\-]{8,}" title="Please enter a valid phone number">
+
+  <label class="req" for="priority">Priority Level</label>
+  <select id="priority" name="Priority" required>
+    <option value="">Please Select</option>
+    <option>Low (Non-urgent)</option>
+    <option>Medium (Needs attention soon)</option>
+    <option>High (Urgent issue)</option>
+  </select>
+
+  <label class="req" for="brief">Brief description</label>
+  <input id="brief" name="Brief description" required>
+
+  <label class="req" for="help">How can we help?</label>
+  <textarea id="help" name="message" rows="6" required></textarea>
+
+  <button type="submit" id="submit">Submit</button>
+  <div id="result" role="status"></div>
+</form>
+
+<script>
+const form = document.getElementById('support-form');
+const result = document.getElementById('result');
+const btn = document.getElementById('submit');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  btn.disabled = true; btn.textContent = 'Sending...'; result.textContent = '';
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', { method:'POST', body:new FormData(form) });
+    const data = await res.json();
+    if (data.success) { result.textContent = 'Thanks, your request has been sent.'; form.reset(); }
+    else { result.textContent = data.message || 'Something went wrong.'; }
+  } catch (err) { result.textContent = 'Network error. Please try again.'; }
+  btn.disabled = false; btn.textContent = 'Submit';
+});
+</script>
+</body>
+</html>
