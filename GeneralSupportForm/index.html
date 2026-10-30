@@ -72,6 +72,8 @@
 </form>
 
 <script>
+const REDIRECT_URL = 'https://www.habitat3.com.au/thank-you-support-request';
+
 const form = document.getElementById('support-form');
 const result = document.getElementById('result');
 const btn = document.getElementById('submit');
@@ -81,9 +83,14 @@ form.addEventListener('submit', async (e) => {
   try {
     const res = await fetch('https://api.web3forms.com/submit', { method:'POST', body:new FormData(form) });
     const data = await res.json();
-    if (data.success) { result.textContent = 'Thanks, your request has been sent.'; form.reset(); }
-    else { result.textContent = data.message || 'Something went wrong.'; }
-  } catch (err) { result.textContent = 'Network error. Please try again.'; }
+    if (data.success) {
+      window.location.href = REDIRECT_URL;
+      return;
+    }
+    result.textContent = data.message || 'Something went wrong.';
+  } catch (err) {
+    result.textContent = 'Network error. Please try again.';
+  }
   btn.disabled = false; btn.textContent = 'Submit';
 });
 </script>
