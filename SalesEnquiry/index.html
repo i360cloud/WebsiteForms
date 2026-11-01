@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Submit Enquiry</title>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+  :root { --accent:#2563eb; --border:#d1d5db; --text:#111827; --muted:#6b7280; }
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,sans-serif; background:#f3f4f6; color:var(--text); margin:0; padding:24px; }
+  form { max-width:640px; margin:0 auto; background:#fff; padding:32px; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.1); }
+  h1 { margin:0 0 8px; font-size:1.6rem; }
+  .intro { margin:0 0 24px; font-size:.95rem; color:var(--muted); }
+  label { display:block; font-weight:600; margin:18px 0 6px; font-size:.95rem; }
+  .req::after { content:" *"; color:#dc2626; }
+  input, select, textarea { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font:inherit; }
+  input:focus, select:focus, textarea:focus { outline:2px solid var(--accent); border-color:transparent; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .privacy { margin-top:24px; font-size:.85rem; color:var(--muted); }
+  .cf-turnstile { margin-top:20px; }
+  button { margin-top:24px; width:100%; padding:12px; background:var(--accent); color:#fff; border:0; border-radius:8px; font:inherit; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:default; }
+  #result { margin-top:16px; text-align:center; font-size:.95rem; color:#b91c1c; }
+  .hp { display:none; }
+  @media (max-width:520px) { .row { grid-template-columns:1fr; } form { padding:20px; } }
+</style>
+</head>
+<body>
+<form id="enquiry-form">
+  <h1>Submit Enquiry</h1>
+  <p class="intro">Please fill out this form to submit your enquiry to Habitat3.</p>
+
+  <input type="hidden" name="formId" value="SalesEnquiry">
+  <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off">
+
+  <label class="req">Name</label>
+  <div class="row">
+    <div><input name="firstName" placeholder="First Name" required aria-label="First name"></div>
+    <div><input name="lastName" placeholder="Last Name" required aria-label="Last name"></div>
+  </div>
+
+  <label class="req" for="business">Company/Organisation</label>
+  <input id="business" name="business" required>
+
+  <label class="req" for="email">Email</label>
+  <input id="email" type="email" name="email" placeholder="example@example.com" required>
+
+  <label class="req" for="phone">Phone Number</label>
+  <input id="phone" type="tel" name="phone" required pattern="[0-9+()\s\-]{8,}" title="Please enter a valid phone number">
+
+  <label class="req" for="subject">Brief Description</label>
+  <input id="subject" name="subject" required>
+
+  <label for="message">Detailed description of your requirements</label>
+  <textarea id="message" name="message" rows="6"></textarea>
+
+  <label for="referral">How did you hear about Habitat3?</label>
+  <select id="referral" name="referral">
+    <option value="">Please Select</option>
+    <option>Web Search</option>
+    <option>AI Search</option>
+    <option>Personal Referral</option>
+    <option>Social Media</option>
+    <option>Referral from AWS</option>
+    <option>Other</option>
+  </select>
+
+  <p class="privacy">See our Privacy Policy at: <a href="https://www.habitat3.com.au/policies-agreements" target="_blank" rel="noopener">Privacy Policy Online</a></p>
+
+  <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY"></div>
+
+  <button type="submit" id="submit">Submit</button>
+  <div id="result" role="status"></div>
+</form>
+
+<script>
+const WORKER_URL = 'https://support-form.sysadmin-f50.workers.dev';
+const REDIRECT_URL = 'https://www.habitat3.com.au/thank-you-for-your-enquiry';
+
+const form = document.getElementById('enquiry-form');
+const result = document.getElementById('result');
+const btn = document.getElementById('submit');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  btn.disabled = true; btn.textContent = 'Sending...'; result.textContent = '';
+
+  const fd = new FormData(form);
+  fd.set('botcheck', fd.get('botcheck') ? 'yes' : '');
+
+  try {
+    const res = await fetch(WORKER_URL, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+      window.location.href = REDIRECT_URL;
+      return;
+    }
+    result.textContent = data.message || 'Something went wrong. Please try again.';
+  } catch (err) {
+    result.textContent = 'Network error. Please try again.';
+  }
+  if (window.turnstile) turnstile.reset();
+  btn.disabled = false; btn.textContent = 'Submit';
+});
+</script>
+</body>
+</html>
