@@ -94,7 +94,11 @@ form.addEventListener('submit', async (e) => {
     const res = await fetch(WORKER_URL, { method: 'POST', body: fd });
     const data = await res.json();
     if (data.success) {
-      window.location.href = REDIRECT_URL;
+      try { window.top.location.href = REDIRECT_URL; } catch (err) {}
+      // Fallback if the host page blocks the redirect
+      setTimeout(() => {
+        form.innerHTML = '<h1>Thank you</h1><p>Your enquiry has been sent. We will be in touch shortly.</p><p><a href="' + REDIRECT_URL + '" target="_top">Continue</a></p>';
+      }, 1500);
       return;
     }
     result.textContent = data.message || 'Something went wrong. Please try again.';
@@ -105,5 +109,7 @@ form.addEventListener('submit', async (e) => {
   btn.disabled = false; btn.textContent = 'Submit';
 });
 </script>
+</body>
+</html>
 </body>
 </html>
